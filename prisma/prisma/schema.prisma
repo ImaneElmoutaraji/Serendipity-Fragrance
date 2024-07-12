@@ -1,0 +1,96 @@
+
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Customer {
+  CustomerID  String  @id @default(uuid())
+  Name        String
+  Email       String  @unique
+  Password    String
+  orders      Order[]
+  cartItems   CartItem[]
+}
+
+model Product {
+  ProductID   Int       @id @default(autoincrement())
+  Name        String
+  Description String
+  Price       Float
+  CategoryID  Int
+  GenderID    Int
+  SizeID      Int
+
+  category    Category  @relation(fields: [CategoryID], references: [CategoryID])
+  gender      Gender    @relation(fields: [GenderID], references: [GenderID])
+  size        Size      @relation(fields: [SizeID], references: [SizeID])
+  orderItems  OrderItem[]
+  cartItems   CartItem[]
+}
+
+model Category {
+  CategoryID  Int       @id @default(autoincrement())
+  Name        String
+  products    Product[]
+}
+
+model Gender {
+  GenderID    Int       @id @default(autoincrement())
+  GenderName  String
+  products    Product[]
+}
+
+model Size {
+  SizeID      Int       @id @default(autoincrement())
+  SizeValue   String
+  products    Product[]
+}
+
+model Order {
+  OrderID     Int       @id @default(autoincrement())
+  DateCreation DateTime @default(now())
+  TotalAmount Float
+  CustomerID  String
+
+  customer    Customer  @relation(fields: [CustomerID], references: [CustomerID])
+  orderItems  OrderItem[]
+}
+
+model OrderItem {
+  OrderItemID Int       @id @default(autoincrement())
+  Quantity    Int
+  ProductID   Int
+  OrderID     Int
+
+  product     Product   @relation(fields: [ProductID], references: [ProductID])
+  order       Order     @relation(fields: [OrderID], references: [OrderID])
+}
+
+model CartItem {
+  CartItemID  Int       @id @default(autoincrement())
+  Quantity    Int
+  ProductID   Int
+  CustomerID  String
+
+  product     Product   @relation(fields: [ProductID], references: [ProductID])
+  customer    Customer  @relation(fields: [CustomerID], references: [CustomerID])
+}
+
+model Admin {
+  AdminID     String    @id @default(uuid())
+  Name        String
+  Email       String    @unique
+  Password    String
+  isManager   Boolean
+}
